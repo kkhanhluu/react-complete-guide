@@ -8,7 +8,6 @@ const buildControl = props => {
       <div className={classes.Label}>{props.label}</div>
       <button
         disabled={props.disabled}
-        ingredientAdded
         onClick={props.removed}
         className={classes.Less}
       >
