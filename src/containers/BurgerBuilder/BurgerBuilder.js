@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import * as actionTypes from '../../store/actions';
+import * as actionCreators from '../../store/actions/index';
 import Aux from './../../hoc/Aux/Aux';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
@@ -13,21 +13,11 @@ import axios from '../../axios-orders';
 
 class BurgerBuilder extends Component {
   state = {
-    purchasing: false,
-    loading: false,
-    error: false
+    purchasing: false
   };
 
   componentDidMount() {
-    // console.log(this);
-    // axios
-    //   .get('https://react-burger-builder-60e95.firebaseio.com/ingredients.json')
-    //   .then(res => {
-    //     this.setState({ ingredients: res.data });
-    //   })
-    //   .catch(err => {
-    //     this.setState({ error: true });
-    //   });
+    this.props.onInitIngredients();
   }
 
   updatePurchaseState() {
@@ -48,6 +38,7 @@ class BurgerBuilder extends Component {
   };
 
   purchaseContinueHandler = () => {
+    this.props.onInitPruchase();
     this.props.history.push('/checkout');
   };
 
@@ -59,7 +50,7 @@ class BurgerBuilder extends Component {
       disabledInfo[key] = disabledInfo[key] <= 0;
     }
 
-    let burger = this.state.error ? (
+    let burger = this.props.error ? (
       <p>Ingredients can't be loaded</p>
     ) : (
       <Spinner />
@@ -107,17 +98,22 @@ class BurgerBuilder extends Component {
 
 const mapStateToProps = state => {
   return {
-    ingredients: state.ingredients,
-    totalPrice: state.totalPrice
+    ingredients: state.burgerBuilder.ingredients,
+    totalPrice: state.burgerBuilder.totalPrice,
+    error: state.burgerBuilder.error
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
     onIngredientAdded: ingredientName =>
-      dispatch({ type: actionTypes.ADD_INGREDIENT, ingredientName }),
+      dispatch(actionCreators.addIngredient(ingredientName)),
     onIngredientRemoved: ingredientName =>
-      dispatch({ type: actionTypes.REMOVE_INGREDIENT, ingredientName })
+      dispatch(actionCreators.removeIngredient(ingredientName)),
+    onInitIngredients: () => dispatch(actionCreators.initIngredient()),
+    onFetchIngredientsFailed: () =>
+      dispatch(actionCreators.fetchIngredientsFailed()),
+    onInitPruchase: () => dispatch(actionCreators.purchaseInit())
   };
 };
 
