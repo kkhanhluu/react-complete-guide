@@ -29,25 +29,20 @@ class Checkout extends Component {
             checkoutContinued={this.checkoutContinued}
             ingredients={this.props.ingredients}
           />
+          <Route
+            path={this.props.match.path + '/contact-data'}
+            component={ContactData}
+          />
         </div>
       );
     }
-    return (
-      <div>
-        {summary}
-        <Route
-          path={this.props.match.path + '/contact-data'}
-          component={ContactData}
-        />
-      </div>
-    );
+    return summary;
   }
 }
 
 const mapStateToProps = state => {
   return {
     ingredients: state.burgerBuilder.ingredients,
-    totalPrice: state.burgerBuilder.totalPrice,
     purchased: state.order.purchased
   };
 };
