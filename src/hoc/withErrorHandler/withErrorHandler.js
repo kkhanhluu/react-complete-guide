@@ -1,48 +1,42 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Aux from '../Aux/Aux';
 import Modal from '../../components/UI/Modal/Modal';
 
 const withErrorHandler = (WrappedComponent, axios) => {
-  return class extends Component {
-    constructor(props) {
-      super(props);
+  return props => {
+    const [error, setError] = useState(null);
 
-      this.state = {
-        error: null
-      };
+    const reqInterceptor = axios.interceptors.request.use(req => {
+      setError(null);
+      return req;
+    });
+    const resInterceptor = axios.interceptors.response.use(
+      res => res,
+      err => {
+        setError(err);
+      }
+    );
 
-      this.reqInterceptor = axios.interceptors.request.use(req => {
-        this.setState({ error: null });
-        return req;
-      });
-      this.resInterceptor = axios.interceptors.response.use(
-        res => res,
-        err => {
-          this.setState({ error: err });
-        }
-      );
-    }
-
-    errorConfirmHandler = () => {
-      this.setState({ error: null });
+    const errorConfirmHandler = () => {
+      setError(null);
     };
 
-    componentWillUnmount() {
-      axios.interceptors.request.eject(this.reqInterceptor);
-      axios.interceptors.response.eject(this.resInterceptor);
-    }
+    useEffect(() => {
+      return () => {
+        axios.interceptors.request.eject(reqInterceptor);
+        axios.interceptors.response.eject(resInterceptor);
+      };
+    }, [reqInterceptor, resInterceptor]);
 
-    render() {
-      return (
-        <Aux>
-          <Modal show={this.state.error} modalClosed={this.errorConfirmHandler}>
-            {this.state.error ? this.state.error.message : null}
-          </Modal>
-          <WrappedComponent {...this.props} />
-        </Aux>
-      );
-    }
+    return (
+      <Aux>
+        <Modal show={error} modalClosed={errorConfirmHandler}>
+          {error ? error.message : null}
+        </Modal>
+        <WrappedComponent {...props} />
+      </Aux>
+    );
   };
 };
 
